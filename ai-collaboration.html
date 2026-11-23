@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>AI 协作日志 · 校邮聚焦</title>
+  <link rel="stylesheet" href="./competition-docs.css">
+</head>
+<body>
+  <header>
+    <nav aria-label="参赛资料">
+      <a class="demo-link" href="./">校邮聚焦 · 在线演示</a>
+      <a href="readme.html">双语 README</a><a href="ai-collaboration.html" aria-current="page">AI 协作日志</a>
+    </nav>
+  </header>
+  <main>
+    <article>
+      <h1 id="ai-campus-mail-lens-ai-collaboration-log">校邮聚焦 AI 协作日志 · Campus Mail Lens AI Collaboration Log</h1>
+<p><strong>作品与版本</strong>　2026 AI Vibe Coding 大赛 · 校园生活方向。<a href="https://1209433622cz-maker.github.io/campus-mail-lens/">打开在线演示</a> · <a href="readme.html">双语 README</a></p>
+<p>以下关键提示词摘自本项目的对话，按功能迭代整理。验收来自代码测试、浏览器检查和本机邮件格式检查。私人邮件正文、邮箱标识和原信链接留在本机。</p>
+<h2 id="1">1. 从校园来信中找出行动事项</h2>
+<p><strong>关键提示词</strong>　“可以做一个邮件分级分类的查看网页。”</p>
+<p><strong>问题与修改</strong>　学校和学生组织的邮件混在一个收件箱里，用户要逐条找适用对象和截止时间。Codex 实现来源分类、身份切换、行动分级和详情页，在详情中保留分类所依据的文字。</p>
+<p><strong>参赛者的判断与验收</strong>　参赛者选择以在校身份和具体待办作为浏览入口。虚构海报展样例用研究生与本科生的不同分级验证了这个流程。</p>
+<h2 id="2">2. 修复公开演示无法打开</h2>
+<p><strong>关键提示词</strong>　“我打不开你设计的网页了。”</p>
+<p><strong>问题与修改</strong>　参赛者在 Edge 中看到原 Sites 网址的拦截页，并提供了截图。增加了 Windows 本机启动入口，之后将免登录演示发布到 GitHub Pages。</p>
+<p><strong>参赛者的判断与验收</strong>　参赛者指出实际访问问题并要求可用的在线版本。新地址在 Edge 中加载成功，浏览器自动化进一步检查了免登录入口和演示数据。</p>
+<h2 id="3">3. 对齐校园风格并提供中英切换</h2>
+<p><strong>关键提示词</strong>　“做到风格和样式的统一（需要使用校徽）”“可以一键点击切换语言。”</p>
+<p><strong>问题与修改</strong>　校园应用需要熟悉的导航和双语入口。参赛者提供校内网址和校徽参考，Codex 加入校园配色、校徽、四个校内服务入口和一键切换。演示邮件配有中英文内容。</p>
+<p><strong>参赛者的判断与验收</strong>　参赛者确定视觉参考和双语方式。浏览器检查确认语言切换后，筛选入口、邮件详情和结果计数可继续使用。</p>
+<h2 id="4-outlook">4. 准备学校账号登录和 Outlook 同步</h2>
+<p><strong>关键提示词</strong>　“自动同步 Outlook 里的新邮件，并按登录身份分级分类。”“暂无应用 ID，先发布在线演示。”</p>
+<p><strong>问题与修改</strong>　反复导入文件增加使用步骤。Codex 实现学校 Microsoft 365 登录入口、Microsoft Graph 只读增量读取和按账号区分的浏览器缓存。当前演示可直接打开，真实认证留待校方批准应用。</p>
+<p><strong>参赛者的判断与验收</strong>　参赛者在应用 ID 缺失时选择先发布免登录版。模拟账号测试通过了首次读取、新邮件刷新、身份分级和账号隔离。</p>
+<h2 id="5">5. 新增学术期刊来信</h2>
+<p><strong>关键提示词</strong>　“在发件来源里新增一个非校内的期刊板块。”</p>
+<p><strong>问题与修改</strong>　投稿进展与一般来信混在一起。Codex 将出版社域名、常见投稿系统和稿件流程线索结合起来，加入「学术期刊」筛选及四封虚构工作流邮件。</p>
+<p><strong>参赛者的判断与验收</strong>　参赛者把重点放在投稿确认、审稿、返修等进展。自动化检查覆盖目录推送和相似发件域，以及桌面和手机端的筛选。</p>
+<h2 id="6">6. 用本机样本补齐兼容性与参赛材料</h2>
+<p><strong>关键提示词</strong>　“邮件使用我个人学生邮箱的本地邮件作为样本。”</p>
+<p><strong>问题与修改</strong>　已有样本中的征稿通知写明面向全校同学，早期版本显示为「未注明」。本机导出中还有截断正文和内嵌图片占位符。Codex 扩充了受众写法和截断识别，保留了准确截止时刻，在阅读页标注正文范围及图片，并把 Outlook 原信入口移到正文折叠区外。</p>
+<p><strong>参赛者的判断与验收</strong>　参赛者确认了校徽使用和样本范围，选择先完成本机与自动化验证。隔离浏览器跑通 3,150 封邮件的导入、去重和重载，识别出 415 封节选。校方征稿实例正确显示为全体学生，截止时间仍是 2026 年 12 月 6 日 23:59。真实用户试用记录待补。</p>
+<h2 id="english-summary">English summary</h2>
+<table>
+<thead>
+<tr>
+<th>Iteration</th>
+<th>Participant's decision</th>
+<th>Implementation and verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Campus mail triage</td>
+<td>Organise campus mail around the reader's role and required actions.</td>
+<td>Added sender, role and priority filters with evidence in the reading view. Verified different priorities for two roles with a fictional poster call.</td>
+</tr>
+<tr>
+<td>Demo access</td>
+<td>Report the actual block in Edge and ask for a reachable demo.</td>
+<td>Added a local launcher and published an anonymous demo on GitHub Pages. Verified the new page opened.</td>
+</tr>
+<tr>
+<td>Campus look and languages</td>
+<td>Supply campus references and request the crest and single-click language switching.</td>
+<td>Added the crest, campus service links and bilingual interface and examples. Verified both languages in the browser.</td>
+</tr>
+<tr>
+<td>Outlook integration</td>
+<td>Request automatic sync and publish the demo first while the approved app ID is pending.</td>
+<td>Implemented delegated read-only sync and per-account browser caches. Test sessions used synthetic Graph data.</td>
+</tr>
+<tr>
+<td>Journal mail</td>
+<td>Add a source for manuscript correspondence.</td>
+<td>Used sender domains and workflow phrases. Tested the journal filter, newsletter exclusion and mobile use.</td>
+</tr>
+<tr>
+<td>Local compatibility</td>
+<td>Use the participant's local export as the sample and proceed with automated validation.</td>
+<td>Corrected audience mapping, excerpt warnings and original-message access. A loopback test imported, deduplicated and reloaded 3,150 messages.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tools and participant involvement</strong>　Codex supported design, implementation, debugging and verification. ChatGPT Sites hosted the initial demo and GitHub Pages hosts the public release. The participant supplied the original problem, references and product decisions, and identified the access issue. Feedback and corresponding changes from two real users remain pending.</p>
+    </article>
+  </main>
+</body>
+</html>

@@ -1,0 +1,52 @@
+:root {
+  color-scheme: light;
+  color: #242036;
+  background: #f6f2f7;
+  font-family: system-ui, "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+body { margin: 0; }
+header { background: #fff; border-bottom: 3px solid #783478; }
+nav, main { width: min(94%, 920px); margin: 0 auto; }
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1.25rem;
+  align-items: center;
+  padding: .8rem 0;
+}
+nav a { font-size: .93rem; }
+.demo-link { font-weight: 750; margin-right: auto; }
+[aria-current="page"] { font-weight: 700; text-decoration-thickness: 2px; }
+
+main { margin-block: 1.5rem 3rem; }
+article {
+  padding: clamp(1.1rem, 4.7vw, 3rem);
+  background: #fff;
+  border: 1px solid #e9deeb;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+article > :first-child { margin-top: 0; }
+article > :last-child { margin-bottom: 0; }
+h1, h2, h3 { color: #392141; line-height: 1.35; }
+h1 { font-size: clamp(1.55rem, 4vw, 2.25rem); margin-top: 2rem; }
+h2 { font-size: 1.35rem; border-top: 1px solid #eee5ef; padding-top: 1.3rem; margin-top: 2rem; }
+h3 { font-size: 1.12rem; margin-top: 1.5rem; }
+a { color: #6f286e; text-underline-offset: .19em; }
+a:focus-visible { outline: 2px solid #8a488a; outline-offset: 3px; }
+ol, ul { padding-left: 1.45rem; }
+li + li { margin-top: .3rem; }
+pre { padding: .9rem 1rem; border-radius: 8px; overflow: auto; background: #f4eff6; }
+code { font-family: Consolas, "SFMono-Regular", monospace; font-size: .89em; }
+table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+th, td { padding: .65rem; text-align: left; vertical-align: top; border: 1px solid #e5dce8; }
+th { background: #f4ecf4; }
+
+@media (max-width: 600px) {
+  main { margin-block: .85rem 2rem; }
+  .demo-link { width: 100%; }
+  table { display: block; overflow-x: auto; }
+}
