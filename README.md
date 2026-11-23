@@ -1,0 +1,122 @@
+2026 AI Vibe Coding 大赛<br>
+主办单位｜香港中文大学（深圳）人文社科学院跨文化交流学科部<br>
+2026 AI Vibe Coding Competition<br>
+Presented by the Division of Intercultural Communication<br>
+School of Humanities and Social Science<br>
+The Chinese University of Hong Kong, Shenzhen
+
+# 校邮聚焦 · Campus Mail Lens
+
+[打开在线演示](https://1209433622cz-maker.github.io/campus-mail-lens/) · [AI 协作日志](AI-COLLABORATION.md) · [English](#english)
+
+**参赛方向**　校园生活 · 信息整理
+
+港中大（深圳）的本科生和研究生会同时收到学院、书院、行政部门和学生组织的邮件。海报征稿、学籍确认、活动通知散在同一个收件箱里，适用对象和截止时间常写在正文。校邮聚焦把来信按来源和行动时限组织起来，让学生先看与自己有关的事项，再回到原文核对。教师、行政员工也可以切换浏览身份。研究人员可在「学术期刊」单独查看投稿和返修来信。
+
+## 使用方式
+
+1. 打开在线演示。演示库内有 18 封虚构邮件，可直接开始。
+2. 选择「研究生」，搜索「海报展」，查看提交截止时间与分级依据。切换到「本科生」，对比同一封通知如何变为「其他人群」。
+3. 点击「发件来源 → 学术期刊」体验收稿、送审、返修和校样。也可按主题、分级与未读状态组合筛选，或搜索标题、发件人和正文。
+4. 点「导入邮件」选择一个或多个 EML、MBOX 或邮件包 JSON。再次导入同一封邮件时自动去重。来自 Outlook 的邮件包可以保留原信链接，点击后由 Outlook 处理访问权限。
+5. 点击页眉的 **EN / 中文** 切换界面。界面会记住语言选择。演示邮件有中英两套文本，导入的邮件以发件人的原文呈现。
+
+收藏、已读及已处理状态保存在当前浏览器。
+
+在 Windows 上双击「校邮聚焦-打开本地版.cmd」即可启动网页。启动器会打开浏览器并复用已运行的实例。本地版使用当前电脑的回环地址，导入和阅读状态保存在这个地址对应的浏览器资料库。若切换到本地版，使用「导入邮件」选择你已有的本地资料包。
+
+~~~powershell
+python scripts/local_web.py
+~~~
+
+### 分级和资料库
+
+- 当原信明确面向其它身份时，标为「其他人群」。邮件里明确写出的院系也显示在详情中。
+- 按港深时间计算，未来 72 小时内到期的行动标为「即将截止」。未来较远或时限待确认的行动标为「需要行动」。已经超过截止日期的邮件归入「已经截止」。
+- 讲座、签到、比赛或服务开放时间单独处理。应用优先寻找与报名、提交、确认等动作一起出现的日期，并在详情中保留判断所用原文。
+- 演示库使用虚构通知和固定的 2026 年 11 月 23 日。导入后的正文以纯文本保存到当前浏览器的 IndexedDB。不同浏览器和站点地址有各自的本地资料库。
+- 导入器读取邮件的纯文本和可转换的 HTML 文本。检测到截断或内嵌图片时，详情会标出正文范围和图片提示。有原信链接的邮件可直接回到 Outlook 核对二维码、附件及完整正文。分级基于可解释的规则，适用对象、相对时间或日期格式复杂时，以原信为准。
+- 「发件来源」中的「学术期刊」结合发件域名、稿件编号和流程用语识别投稿确认、审稿进展、编辑决定、返修和校样。覆盖 Springer Nature、Elsevier、Wiley、Taylor & Francis 等出版社以及 Editorial Manager、ScholarOne 等投稿系统。[Editorial Manager 发件域说明](https://emhelp.editorialmanager.com/robohelp/Set_Email_From_Designation.htm) · [Taylor & Francis 投稿系统说明](https://authorservices.taylorandfrancis.com/publishing-your-research/making-your-submission/)
+
+### 校园入口
+
+页眉使用提供的校徽图和校园紫，并集成四个常用入口。[办事大厅](https://i.cuhk.edu.cn/index) · [图书馆](https://library.cuhk.edu.cn/) · [Blackboard](https://bb.cuhk.edu.cn/) · [资讯科技服务处](https://itso.cuhk.edu.cn/)
+
+## AI 协作与验证
+
+参赛者提出校园来信筛选场景、确认学校风格和校徽、指出原托管地址的访问障碍，并决定先发布免登录演示。使用 Codex 通过自然语言协作实现、调试和测试。原演示使用 ChatGPT Sites，公开版部署在 GitHub Pages。网页使用 HTML、CSS 和 JavaScript，本地启动器使用 Python。邮件分级在浏览器中按规则执行。关键需求、人工判断与验证结果见日志。[AI 协作日志](AI-COLLABORATION.md)
+
+- **本机兼容性验证**　用参赛者的本机邮箱导出检查了 3,150 条记录的导入、去重和重载。识别出 415 封正文节选。公开演示与提交材料使用虚构邮件及本机验证的汇总数字。
+- **验证后的改进**　将「面向全校同学」识别为全体学生，保留表格和加粗日期里的准确截止时间，标明正文节选和内嵌图片，并将 Outlook 原信入口放在详情中可直接点击的位置。手机端标为已处理后返回列表。
+- **自动化验证**　23 项 Node 测试通过。浏览器测试覆盖有原信链接的邮件、桌面和移动端流程、语言切换，以及模拟学校账号的自动同步和账号隔离。
+
+**真实用户反馈与对应改进**　征稿启事要求的两位真实用户试用记录待补。当前结果来自本机邮件格式验证、虚构用例和自动化测试。
+
+## 校内接入
+
+校内网的「学生邮箱」入口目前打开 Microsoft 365 Outlook。学校资讯科技服务处也说明学生邮箱由 Microsoft 365 搭建，学号邮箱和别称对应同一账户。[港中大（深圳）ITSO 账号说明](https://itso.cuhk.edu.cn/article/338)
+
+在线演示可在未登录时体验校园分级。学校入口已经实现 Microsoft 365 登录及邮件增量读取，在学校提供批准的 Entra 应用 ID 后启用。启用时注册单租户 SPA 回调，授予 Microsoft Graph 的委派 `User.Read` 和 `Mail.Read`，在 `dist/outlook-config.js` 填入公开 Application (client) ID。[在线演示](https://1209433622cz-maker.github.io/campus-mail-lens/) · [Microsoft Entra SPA 注册](https://learn.microsoft.com/en-us/entra/identity-platform/scenario-spa-app-registration)
+
+学校管理员可以分配 `Campus.Undergraduate`、`Campus.Postgraduate`、`Campus.Faculty` 或 `Campus.Staff` 应用角色。缺少精细角色时按学校邮箱域和目录职务自动使用可确认的分类。网页打开后首次读取近 30 天收件箱中的校内来信和期刊投稿通知，再于前台每两分钟同步新增与变更。浏览器以租户和账号为键保存同步状态。[Microsoft Graph 增量同步](https://learn.microsoft.com/en-us/graph/delta-query-messages)
+
+GitHub Pages 的生产 SPA 回调为 `https://1209433622cz-maker.github.io/campus-mail-lens/`。学校应用完成相应回调和权限审批后，再把公开 ID 写入配置，进行校内账户登录验收。
+
+邮件包结构以 JSON 字段描述。每封记录使用主题、发件人名称、发件邮箱、ISO 8601 时间和纯文本正文。邮件 ID 用于去重，原信链接可选。
+
+~~~json
+{
+  "format": "campus-mail-lens/v1",
+  "messages": [
+    {
+      "messageId": "sample-1@example.test",
+      "subject": "校园讲座通知",
+      "senderName": "学术交流中心",
+      "senderEmail": "lecture@campus.example",
+      "sentAt": "2026-11-23T08:00:00Z",
+      "body": "活动对象：全校师生\n讲座时间：11月25日 19:30",
+      "bodyFormat": "full",
+      "wasRead": false
+    }
+  ]
+}
+~~~
+
+## English
+
+**Competition category**　Campus Life · Information organisation
+
+Undergraduates and postgraduates at CUHK-Shenzhen receive mail from schools, colleges, administrative offices and student groups. Calls for submissions, registration checks and event announcements arrive in the same inbox, with the relevant audience and deadline inside the message. Campus Mail Lens helps students find the messages that need their attention and check the supporting text. Faculty and administrative staff can browse as their roles. Researchers can also review journal correspondence by sender source.
+
+### Try the demo
+
+1. Open the demo to browse 18 fictional messages.
+2. Choose **Postgraduate**, then search for **poster exhibition**. Open the result to check the deadline and see why it is urgent. Switch to **Undergraduate** to see the same mail marked for a different audience.
+3. Choose **Sender sources → Academic journals** to see submission confirmations, review updates, revision requests and proofs. Combine topic, priority and unread filters, or search the subject, sender and body.
+4. Use **Import mail** to import EML, MBOX or a JSON mailbox bundle. Duplicate messages are recognised on reimport. Bundles can carry a link to the original Outlook message.
+5. Use **EN / 中文** to switch the interface and demo messages. Imported mail stays in its original language. Saved, read and processed status are stored in the current browser.
+
+The details show the audience, deadline and matching evidence. The app marks actions due within 72 hours, identifies available actions without a firm deadline, and flags elapsed dates or a different audience. The demo uses 23 November 2026 as its reference date. If an export contains an excerpt or an inline image, use the original mail to check the complete information. Imported mail is stored in IndexedDB on the current browser and site.
+
+On Windows, double-click **校邮聚焦-打开本地版.cmd** to open the application on the computer's loopback address. School sign-in and read-only Outlook delta sync were tested with synthetic accounts. A school-approved Microsoft Entra app ID and delegated consent are needed for live use.
+
+### AI collaboration and validation
+
+The participant defined the campus mail problem, confirmed the visual requirements and university crest, reported the blocked demo and chose an anonymous public demo first. Codex implemented and tested the app through natural-language iteration. The initial demo used ChatGPT Sites and the public release uses GitHub Pages. The app uses HTML, CSS and JavaScript, with a Python launcher for Windows and rules that run in the browser. [AI collaboration log](AI-COLLABORATION.md)
+
+- **Local compatibility**　The participant's export of 3,150 mail records was imported, deduplicated and reloaded on the local computer. The app identified 415 excerpts. The public demo and submission materials use fictional mail and aggregate validation counts.
+- **Changes based on validation**　The app recognises the campus wording for all students, retains precise deadlines in tables and bold text, identifies excerpts and inline images, and exposes the original Outlook link in the reading pane. Processing an item on mobile returns the reader to the list.
+- **Automated verification**　All 23 Node tests passed. Browser checks covered the original link, desktop and mobile flows, both languages, and simulated Outlook delta sync with account isolation.
+
+**Real user feedback and corresponding revisions**　Feedback from the two real users required by the call for submissions is pending. The current results are based on local compatibility checks, fictional examples and automated tests.
+
+## 开发与验证 · Development and verification
+
+在本地源码目录运行下面的命令。邮件审计脚本接收本机 JSON 文件路径，只输出计数。
+
+Run these commands in the local source checkout. The mailbox audit accepts a local JSON path and prints aggregate counts. PostalMime 4.2.1 handles MIME decoding and includes its license under the vendor directory.
+
+~~~powershell
+node --test tests/*.test.js
+node scripts/audit_mailbox.mjs "<local mailbox JSON path>"
+~~~

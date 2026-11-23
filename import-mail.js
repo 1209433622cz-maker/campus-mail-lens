@@ -9,6 +9,8 @@ const supportedEmailHosts = new Set([
 const MAILBOX_LIMIT = 128 * 1024 * 1024
 const EML_LIMIT = 25 * 1024 * 1024
 const PACK_FORMAT = "campus-mail-lens/v1"
+const exportTruncation = /(?:\.{3}|…)\s*\(truncated\)\s*$/i
+const inlineImageLink = /!\[[^\]\r\n]*\]\(cid:[^)\r\n]+\)/gi
 let parser
 
 export function safeOriginalUrl(raw) {
@@ -37,6 +39,19 @@ function clean(value) {
   return typeof value === "string" ? value.replace(/\u0000/g, "").replace(/\r\n?/g, "\n").trim() : ""
 }
 
+export function mailBodyFormat(mail) {
+  return mail.bodyFormat === "preview" || exportTruncation.test(mail.body) ? "preview" : "full"
+}
+
+export function mailDisplayText(mail) {
+  let hasInlineImages = mail.hasInlineImages === true
+  const text = clean(mail.body).replace(exportTruncation, "").replace(inlineImageLink, () => {
+    hasInlineImages = true
+    return ""
+  }).replace(/\n{3,}/g, "\n\n").trim()
+  return { text, hasInlineImages }
+}
+
 async function digest(value) {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))
   return [...new Uint8Array(bytes)].map(byte => byte.toString(16).padStart(2, "0")).join("")
@@ -62,7 +77,8 @@ export async function normalizeMail(row) {
     senderName: senderName || senderEmail,
     sentAt,
     body,
-    bodyFormat: row.bodyFormat === "preview" ? "preview" : "full",
+    bodyFormat: mailBodyFormat({ body, bodyFormat: row.bodyFormat }),
+    hasInlineImages: row.hasInlineImages === true,
     originalUrl: safeOriginalUrl(row.originalUrl),
     wasRead: row.wasRead === true
   }
@@ -79,7 +95,8 @@ async function parseEml(bytes) {
     senderName: mail.from?.name,
     sentAt: mail.date,
     body: mail.text || plainHtml(mail.html || ""),
-    bodyFormat: "full"
+    bodyFormat: "full",
+    hasInlineImages: mail.attachments.some(part => part.contentId && /^image\//i.test(part.mimeType))
   })
 }
 

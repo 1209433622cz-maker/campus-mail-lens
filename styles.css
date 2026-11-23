@@ -492,7 +492,7 @@ select:focus-visible { outline-offset: 1px; }
   line-height: 1.7;
   padding: 8px 4px 2px 0;
 }
-.original-link { display: inline-block; margin-top: 10px; font-size: .875rem; text-underline-offset: 3px; }
+.original-link { display: inline-block; margin: 0 0 13px; font-size: .875rem; text-underline-offset: 3px; }
 .empty { min-height: 220px; display: grid; place-content: center; justify-items: center; text-align: center; padding: 24px 18px; gap: 9px; }
 .empty .metric-icon { width: 47px; height: 47px; --metric-wash: var(--purple-wash); --metric-ink: var(--purple-ink); }
 .empty h2 { font-size: 1.02rem; }

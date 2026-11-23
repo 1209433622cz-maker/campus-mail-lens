@@ -87,11 +87,12 @@ const degreeRoles = {
 
 const audiencePrefix = /适用对象|报名对象|招生对象|参与对象|活动对象|目标人群|适用人群|面向|仅对|仅限|参加资格|目标读者|eligibility|open to|target audience|for (?:all |current )?(?:undergraduates?|postgraduates?|graduate students?|the faculty|staff)|^\s*(?:dear|各位|致)\s*/i
 const allPeople = /全校师生|全体师生|老师[、和及与，,\s]+同学|教职员工和学生|all (?:members of the university|students and staff|faculty,?\s*staff and students|faculty and students)|all students, faculty and staff/i
-const students = /全校学生|全体(?:在读)?学生|各位同学|全体同学|^Dear (?:all )?students\b|(?:all|current) students\b/i
+const students = /(?:全校|全体)(?:在读)?(?:学生|同学)|各位同学|^Dear (?:all )?students\b|(?:all|current) students\b/i
 const departments = /医学院|人文社科学院|数据科学学院|人工智能学院|理工学院|经管学院|音乐学院|公共政策学院|School of (?:Medicine|Humanities and Social Science|Data Science|Artificial Intelligence|Science and Engineering|Management and Economics|Music|Public Policy)/i
 const deadlineCue = /截止(?:时间|日期)?|截至|最迟|限于|延期至|延至|请在.+?前|请于.+?前|(?:报名|提交|申请|缴费|登记|确认|反馈|截止|回执)\s*(?:延长)?至|(?:报名|申请|提交)(?:时间|窗口)[：:].*?[至~～–—]|deadline|\bno later than\b|\b(?:register|submit|apply|rsvp|reply|respond)(?:\s+\w+){0,3}\s+(?:by|before)\b|\bdue (?:date|by|on)\b/i
 const earlyDateCue = /开始|开放|签到|开幕|活动时间|会议时间|讲座时间|session starts|event date|registration opens/i
 const actionCue = /请(?:务必|尽快|按时|先行|提前|在线|大家)?\s*(?:完成|填写|提交|登记|确认|办理|回复|报名|登录|预约|缴费|选择|核对|更新|回执)|请(?:于|在)[^。；\n]{1,72}(?:前|内)\s*(?:提交|确认|报名|完成|回复)|必须|务必|需要完成|开放报名|即日起报名|开始报名|需要(?:注册|提交|确认|缴费)|required|mandatory|action required|please\s+(?:submit|register|complete|confirm|respond|apply|fill|check|reply)|\brsvp\b/i
+const optionalAction = /(?:无[须需]|不必|不用|不需要)(?:另行|提前|再次|再)?(?:报名|回复|登记|注册|确认|提交|办理|缴费)|\bno (?:further )?(?:action|registration|response|reply) (?:is )?required\b|\b(?:registration|a response|a reply) (?:is )?not required\b/gi
 const otherTimeZone = /\b(?:PST|PDT|EST|EDT|MST|MDT|BST|CET|CEST|JST|KST|ET|PT)\b|(?:UTC|GMT)\s*(?:-|[+]\s*(?!0?8\b)\d)/i
 const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
 const monthWord = "January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec"
@@ -218,7 +219,7 @@ function pickContextDate(line, sent) {
 export function findDeadline(mail) {
   const sent = Date.parse(mail.sentAt ?? "")
   const subject = normalText(mail.subject)
-  const lines = [subject, ...nonemptyLines(mail.body)]
+  const lines = [subject, ...nonemptyLines(mail.body)].map(line => line.replace(/\*\*/g, "").trim())
   const dated = []
   let hint = null
   lines.forEach((line, index) => {
@@ -265,7 +266,7 @@ export function analyzeMail(mail) {
     : careerSender ? "career" : topicMatchers.find(([, pattern]) => pattern.test(subject))?.[0] ?? "general"
   const audience = inferAudience(mail)
   const deadline = findDeadline(mail)
-  const action = [subject, ...nonemptyLines(body)].find(line => actionCue.test(line)) ?? ""
+  const action = [subject, ...nonemptyLines(body)].find(line => actionCue.test(line.replace(optionalAction, ""))) ?? ""
   const search = normalText([subject, from, body, TOPICS[topic], SOURCES[source].label, audience.label].join(" ")).toLowerCase()
   const campusDomain = isCampusSender(mail.senderEmail)
   return { ...mail, source, topic, audience, deadline, action, search, campusDomain }

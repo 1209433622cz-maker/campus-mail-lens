@@ -1,3 +1,5 @@
+import { mailBodyFormat } from "./import-mail.js"
+
 const DB_NAME = "campus-mail-lens"
 const MAIL = "messages"
 const OUTLOOK = "outlook-snapshots"
@@ -49,7 +51,7 @@ export async function insertLocalMail(messages) {
       const check = store.get(message.id)
       check.onsuccess = () => {
         const existing = check.result
-        if (existing?.bodyFormat === "preview" && message.bodyFormat === "full") {
+        if (existing && mailBodyFormat(existing) === "preview" && message.bodyFormat === "full") {
           store.put(message)
           inserted.push(message)
           return

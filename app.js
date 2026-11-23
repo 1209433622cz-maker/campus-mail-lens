@@ -4,7 +4,7 @@ import {
 } from "./classify.js"
 import { demoMessages } from "./demo.js"
 import { copyForAudience, setPageLanguage, translate } from "./i18n.js"
-import { collectMail } from "./import-mail.js"
+import { collectMail, mailBodyFormat, mailDisplayText } from "./import-mail.js"
 import { insertLocalMail, loadFlags, loadPreference, readLocalMail, saveFlags, savePreference } from "./storage.js"
 import { createOutlookReader } from "./outlook-reader.js"
 
@@ -314,7 +314,9 @@ function render() {
     && (!state.unreadOnly || !status.read)
     && matchesSearch(item, words)
   ).sort((a, b) => byOrder(state.sort, a, b))
-  const selection = entries.find(entry => entry.item.id === state.selected) ?? visibleMessages[0]
+  const current = scoped.find(entry => entry.item.id === state.selected)
+  const selection = current ?? visibleMessages[0]
+  if (!current) state.reading = false
   state.selected = selection?.item.id ?? null
   $("result-count").textContent = t(visibleMessages.length === 1 ? "results.one" : "results.other", { count: countText(visibleMessages.length) })
   $("reset-filters").hidden = !filterActive
@@ -360,6 +362,8 @@ function drawDetail(entry) {
   }
   const { item, priority, status } = entry
   const shown = visibleCopy(item)
+  const preview = mailBodyFormat(item) === "preview"
+  const { text: bodyText, hasInlineImages } = mailDisplayText(shown)
   const outer = element("div", "detail-inner")
   const bar = element("div", "detail-toolbar")
   const actions = element("div", "detail-actions")
@@ -397,10 +401,12 @@ function drawDetail(entry) {
     detailFact(t("audience"), audience),
     detailFact(t("deadline"), formatDeadline(item.deadline, false, state.language), priority.level === "soon")
   )
-  if (item.bodyFormat === "preview") facts.append(detailFact(t("bodyCoverage"), t("previewCoverage")))
+  if (preview) facts.append(detailFact(t("bodyCoverage"), t("previewCoverage")))
+  if (hasInlineImages) facts.append(detailFact(t("bodyImages"), t("bodyImagesCoverage")))
 
   const reason = element("div", "reason")
-  reason.append(element("h3", "", t("reason")), element("p", "", t(priority.reasonKey, { audience, profile: t("profile." + activeProfile()) })))
+  const reasonKey = preview && priority.level === "info" ? "reason.preview" : priority.reasonKey
+  reason.append(element("h3", "", t("reason")), element("p", "", t(reasonKey, { audience, profile: t("profile." + activeProfile()) })))
   const quote = shown === item || !priority.quote ? priority.quote
     : prioritize(shown, state.profile, DEMO_NOW).quote
   if (quote) reason.append(element("p", "source-line", t("quote", { text: quote.slice(0, 230) })))
@@ -408,17 +414,18 @@ function drawDetail(entry) {
   const content = element("details", "mail-body")
   content.open = true
   content.append(
-    element("summary", "", t(item.bodyFormat === "preview" ? "preview" : "original")),
-    element("p", "", shown.body || t("bodyEmpty"))
+    element("summary", "", t(preview ? "preview" : "original")),
+    element("p", "", bodyText || t("bodyEmpty"))
   )
+  outer.append(bar, element("h2", "detail-subject", subjectText(item)), sender, tags, facts, reason)
   if (item.originalUrl) {
     const original = element("a", "original-link", t("outlook"))
     original.href = item.originalUrl
     original.target = "_blank"
     original.rel = "noopener noreferrer"
-    content.append(original)
+    outer.append(original)
   }
-  outer.append(bar, element("h2", "detail-subject", subjectText(item)), sender, tags, facts, reason, content)
+  outer.append(content)
   pane.replaceChildren(outer)
 }
 
