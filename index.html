@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="在同一个工作台按来源、主题、适用对象和行动时限筛选校园邮件。">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; form-action 'none'">
+  <title>校邮聚焦 · 校园邮件工作台</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="campus-header">
+    <div class="campus-header-inner">
+      <a class="university-brand" href="https://i.cuhk.edu.cn/index" target="_blank" rel="noopener noreferrer">
+        <img src="./assets/cuhksz-logo.png" width="697" height="100" alt="香港中文大学（深圳）" data-copy-alt="university">
+      </a>
+      <strong class="product-name" data-copy="product">校邮聚焦</strong>
+      <nav class="campus-links" aria-label="校园服务快捷入口" data-copy-label="campusLinks">
+        <a href="https://i.cuhk.edu.cn/index" target="_blank" rel="noopener noreferrer">
+          <span class="glyph i-building" aria-hidden="true"></span><span data-copy="portal">办事大厅</span>
+        </a>
+        <a href="https://library.cuhk.edu.cn/zh-hans" target="_blank" rel="noopener noreferrer" data-chinese-url="https://library.cuhk.edu.cn/zh-hans" data-english-url="https://library.cuhk.edu.cn/">
+          <span class="glyph i-book" aria-hidden="true"></span><span data-copy="library">图书馆</span>
+        </a>
+        <a href="https://bb.cuhk.edu.cn/" target="_blank" rel="noopener noreferrer">
+          <span class="glyph i-screen" aria-hidden="true"></span><span data-copy="learning">在线学习</span>
+        </a>
+        <a href="https://itso.cuhk.edu.cn/" target="_blank" rel="noopener noreferrer" data-chinese-url="https://itso.cuhk.edu.cn/" data-english-url="https://itso.cuhk.edu.cn/en/home">
+          <span class="glyph i-info" aria-hidden="true"></span><span data-copy="itServices">IT 服务</span>
+        </a>
+      </nav>
+      <button type="button" class="language-toggle" id="language-toggle" lang="en" aria-label="切换为英文" data-copy-label="switchLanguage">EN</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar" aria-label="邮件导航" data-copy-label="mailNav">
+      <div class="library-switch" role="group" aria-label="资料库" data-copy-label="librarySelector">
+        <button type="button" data-library="demo" aria-pressed="true" data-copy="demo">演示库</button>
+        <button type="button" data-library="local" aria-pressed="false" data-copy="local">本地邮件</button>
+      </div>
+
+      <nav class="nav" aria-label="工作台" data-copy-label="workspace">
+        <p class="nav-label" data-copy="workspace">工作台</p>
+        <button type="button" class="nav-item" data-view="inbox" aria-current="page">
+          <span class="glyph i-inbox" aria-hidden="true"></span><span data-copy="view.inbox">邮件总览</span><span class="nav-count" id="inbox-count">0</span>
+        </button>
+        <button type="button" class="nav-item" data-view="saved">
+          <span class="glyph i-bookmark" aria-hidden="true"></span><span data-copy="view.saved">我的收藏</span><span class="nav-count" id="saved-count">0</span>
+        </button>
+        <button type="button" class="nav-item" data-view="done">
+          <span class="glyph i-check" aria-hidden="true"></span><span data-copy="view.done">已处理</span><span class="nav-count" id="done-count">0</span>
+        </button>
+      </nav>
+
+      <nav class="nav source-nav" aria-label="发件来源" data-copy-label="sources">
+        <p class="nav-label" data-copy="sources">发件来源</p>
+        <div id="source-list"></div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button type="button" id="about-button"><span class="glyph i-info" aria-hidden="true"></span><span data-copy="about">资料库说明</span></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <nav class="breadcrumb" aria-label="当前位置" data-copy-label="location"><span data-copy="workspace">工作台</span><span aria-hidden="true">/</span><strong id="breadcrumb-current">邮件总览</strong></nav>
+        <div class="top-actions">
+          <label class="profile-control" for="profile">
+            <span class="glyph i-user" aria-hidden="true"></span>
+            <span class="profile-label" data-copy="profile">浏览身份</span>
+            <select id="profile" aria-label="浏览身份" data-copy-label="profile">
+              <option value="graduate" data-copy="profile.graduate">研究生</option>
+              <option value="undergraduate" data-copy="profile.undergraduate">本科生</option>
+              <option value="faculty" data-copy="profile.faculty">教师</option>
+              <option value="staff" data-copy="profile.staff">行政员工</option>
+              <option value="all" data-copy="profile.all">全部师生</option>
+            </select>
+          </label>
+          <button type="button" class="button button-primary" id="import-button"><span class="glyph i-plus" aria-hidden="true"></span><span data-copy="import">导入邮件</span></button>
+        </div>
+      </header>
+
+      <section class="content" aria-labelledby="page-title">
+        <div class="page-intro">
+          <div>
+            <h1 id="page-title">邮件总览</h1>
+            <p id="page-description">按身份查看校园来信，优先找到需要行动的邮件。</p>
+          </div>
+          <div class="date-context"><span class="glyph i-calendar" aria-hidden="true"></span><span id="reference-date"></span></div>
+        </div>
+
+        <div class="overview" role="group" aria-label="按分级快速筛选" data-copy-label="quickFilters">
+          <button type="button" class="metric metric-soon" data-quick="soon" aria-pressed="false">
+            <span class="metric-icon"><span class="glyph i-clock" aria-hidden="true"></span></span>
+            <span class="metric-data"><span data-copy="dueSoon">72 小时内截止</span><strong id="soon-count">0</strong></span>
+          </button>
+          <button type="button" class="metric metric-action" data-quick="action" aria-pressed="false">
+            <span class="metric-icon"><span class="glyph i-checklist" aria-hidden="true"></span></span>
+            <span class="metric-data"><span data-copy="priority.action">需要行动</span><strong id="action-count">0</strong></span>
+          </button>
+          <button type="button" class="metric metric-info" data-quick="info" aria-pressed="false">
+            <span class="metric-icon"><span class="glyph i-info" aria-hidden="true"></span></span>
+            <span class="metric-data"><span data-copy="priority.info">校园资讯</span><strong id="info-count">0</strong></span>
+          </button>
+        </div>
+
+        <div class="workspace" id="workspace">
+          <section class="list-pane" aria-label="邮件列表" data-copy-label="mailList">
+            <div class="filter-panel">
+              <label class="search-field">
+                <span class="glyph i-search" aria-hidden="true"></span>
+                <input type="search" id="search" placeholder="搜索标题、发件人或正文" aria-label="搜索标题、发件人或正文" data-copy-label="search" data-copy-placeholder="search" autocomplete="off">
+              </label>
+              <div class="filters">
+                <select id="topic-filter" aria-label="按主题筛选" data-copy-label="filterTopic"><option value="all" data-copy="allTopics">全部主题</option></select>
+                <select id="priority-filter" aria-label="按分级筛选" data-copy-label="filterPriority">
+                  <option value="all" data-copy="allPriorities">全部分级</option>
+                  <option value="soon" data-copy="priority.soon">即将截止</option>
+                  <option value="action" data-copy="priority.action">需要行动</option>
+                  <option value="info" data-copy="priority.info">校园资讯</option>
+                  <option value="unrelated" data-copy="priority.unrelated">其他人群</option>
+                  <option value="expired" data-copy="priority.expired">已经截止</option>
+                </select>
+                <input type="checkbox" id="unread-only" class="chip-check">
+                <label class="filter-chip" for="unread-only"><span class="glyph i-circle" aria-hidden="true"></span><span data-copy="unreadOnly">仅未读</span></label>
+                <select id="source-filter" class="mobile-source" aria-label="按来源筛选" data-copy-label="filterSource"><option value="all" data-copy="allSources">全部来源</option></select>
+              </div>
+              <div class="result-bar">
+                <p id="result-count" role="status">正在读取邮件</p>
+                <button type="button" id="reset-filters" class="text-button" data-copy="clearFilters" hidden>清除筛选</button>
+                <select class="sort-control" id="sort" aria-label="排序方式" data-copy-label="sort">
+                  <option value="priority" data-copy="sortPriority">按优先级</option>
+                  <option value="newest" data-copy="sortNewest">最新发出</option>
+                  <option value="deadline" data-copy="sortDeadline">最早截止</option>
+                </select>
+              </div>
+            </div>
+            <div id="mail-list" class="mail-list"></div>
+            <button type="button" class="button button-more" id="show-more" data-copy="showMore" hidden>显示更多</button>
+          </section>
+
+          <section class="detail-pane" id="detail" aria-label="邮件阅读区" data-copy-label="readingPane"></section>
+        </div>
+        <footer class="project-credit">
+          <span>2026 AI Vibe Coding 大赛</span>
+          <span>主办单位｜香港中文大学（深圳）人文社科学院跨文化交流学科部</span>
+          <span lang="en">2026 AI Vibe Coding Competition<br>Presented by the Division of Intercultural Communication<br>School of Humanities and Social Science<br>The Chinese University of Hong Kong, Shenzhen</span>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="import-dialog" aria-labelledby="import-title">
+    <div class="dialog-head">
+      <div>
+        <h2 id="import-title" data-copy="importTitle">导入本地邮件</h2>
+        <p data-copy="importDescription">从邮箱导出邮件后，选择文件批量导入。</p>
+      </div>
+      <button type="button" class="icon-button" data-close="import-dialog" aria-label="关闭" data-copy-label="close"><span class="glyph i-close" aria-hidden="true"></span></button>
+    </div>
+    <label class="drop-zone" id="drop-zone">
+      <input type="file" id="import-files" accept=".eml,.mbox,.json,message/rfc822,application/json" multiple>
+      <span class="upload-icon"><span class="glyph i-inbox" aria-hidden="true"></span></span>
+      <strong data-copy="chooseFiles">选择邮件文件</strong>
+      <small data-copy="dropFiles">可将 .eml、.mbox 或邮件包 .json 拖到此处</small>
+    </label>
+    <p class="storage-note"><span class="glyph i-lock" aria-hidden="true"></span><span data-copy="browserStorage">原文和阅读状态存储在当前浏览器。</span></p>
+    <p class="import-progress" id="import-progress" role="status"></p>
+  </dialog>
+
+  <dialog id="about-dialog" aria-labelledby="about-title">
+    <div class="dialog-head">
+      <div><h2 id="about-title" data-copy="about">资料库说明</h2><p data-copy="aboutDescription">校邮聚焦是面向校园邮件阅读的参赛原型。</p></div>
+      <button type="button" class="icon-button" data-close="about-dialog" aria-label="关闭" data-copy-label="close"><span class="glyph i-close" aria-hidden="true"></span></button>
+    </div>
+    <dl class="about-list">
+      <dt data-copy="demo">演示库</dt><dd data-copy="aboutDemo">内置虚构通知，分级以 2026 年 11 月 23 日为例。</dd>
+      <dt data-copy="local">本地邮件</dt><dd data-copy="aboutLocal">根据你选择的浏览身份、来信中的行动语句和截止日期排序。原文可在每封邮件的阅读区核对。</dd>
+      <dt data-copy="exportOutlook">从 Outlook 导出</dt><dd data-copy="aboutExport">在邮件的更多操作中选择「下载」和「下载为 EML」，再回到这里导入。</dd>
+    </dl>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
