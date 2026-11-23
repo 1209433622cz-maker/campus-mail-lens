@@ -1,6 +1,6 @@
 const copy = {
   pageTitle: ["校邮聚焦 · 校园邮件工作台", "Campus Mail Lens · Campus mail workspace"],
-  pageDescription: ["按来源、主题、适用对象和行动时限筛选校园邮件。", "Filter campus mail by sender, topic, audience and deadline."],
+  pageDescription: ["按来源、主题、适用对象和行动时限筛选校园来信和期刊投稿通知。", "Filter campus and journal mail by sender, topic, audience and deadline."],
   product: ["校邮聚焦", "Campus Mail Lens"],
   university: ["香港中文大学（深圳）", "The Chinese University of Hong Kong, Shenzhen"],
   campusLinks: ["校园服务快捷入口", "Campus service links"],
@@ -17,7 +17,7 @@ const copy = {
   "view.inbox": ["邮件总览", "Mail overview"],
   "view.saved": ["我的收藏", "Saved mail"],
   "view.done": ["已处理", "Processed"],
-  "viewDescription.inbox": ["按身份查看校园来信，优先找到需要行动的邮件。", "Use your campus role to find messages that need your attention."],
+  "viewDescription.inbox": ["按来源查看校园来信和期刊通知，优先找到需要行动的邮件。", "Browse campus and journal mail by source and find messages that need your attention."],
   "viewDescription.saved": ["回看你收藏的来信。", "Review your saved messages."],
   "viewDescription.done": ["回看在工作台标记为已处理的邮件。", "Review messages you marked as processed."],
   sources: ["发件来源", "Sender sources"],
@@ -26,6 +26,7 @@ const copy = {
   "source.library": ["图书馆与信息服务", "Library & IT services"],
   "source.college": ["书院", "Colleges"],
   "source.club": ["社团与学生组织", "Clubs & student groups"],
+  "source.journal": ["学术期刊", "Academic journals"],
   "source.other": ["其他来源", "Other sources"],
   location: ["当前位置", "Current location"],
   profile: ["浏览身份", "Campus role"],
@@ -41,7 +42,7 @@ const copy = {
   dueSoon: ["72 小时内截止", "Due within 72 hours"],
   "priority.soon": ["即将截止", "Due soon"],
   "priority.action": ["需要行动", "Action needed"],
-  "priority.info": ["校园资讯", "Campus news"],
+  "priority.info": ["一般通知", "For information"],
   "priority.unrelated": ["其他人群", "Other audience"],
   "priority.expired": ["已经截止", "Deadline passed"],
   mailList: ["邮件列表", "Mail list"],
@@ -84,7 +85,7 @@ const copy = {
   "results.one": ["{count} 封邮件", "{count} message"],
   "results.other": ["{count} 封邮件", "{count} messages"],
   noLocalTitle: ["本地资料库为空", "Your local library is empty"],
-  noLocalDescription: ["导入校园来信后即可按来源、身份和截止时间查看。", "Import campus mail to browse by source, role and deadline."],
+  noLocalDescription: ["导入邮件后即可按来源、身份和截止时间查看。", "Import mail to browse by source, role and deadline."],
   importFirst: ["导入第一封邮件", "Import your first message"],
   loadingLocal: ["正在读取本地资料库", "Loading your local library"],
   noMatches: ["没有符合条件的邮件", "No matching messages"],
@@ -149,7 +150,7 @@ const copy = {
   outlookRedirect: ["应用回调地址", "Application redirect URL"],
   outlookPermissions: ["所需委派权限", "Delegated permissions"],
   outlookStorageTitle: ["同步范围", "What gets synced"],
-  outlookStorageDescription: ["登录后首次读取近 30 天收件箱中的校内来信，打开网页期间自动获取新邮件。资料按账号存储在当前浏览器。", "After you sign in, the app reads the last 30 days of campus mail in your inbox and checks for changes while you use the page. Mail is stored separately for each account in this browser."],
+  outlookStorageDescription: ["登录后首次读取近 30 天收件箱中的校内来信和期刊投稿通知，打开网页期间自动获取新邮件。资料按账号存储在当前浏览器。", "After you sign in, the app reads the last 30 days of campus mail and journal notices in your inbox and checks for changes while you use the page. Mail is stored separately for each account in this browser."],
   outlookRefresh: ["同步新邮件", "Sync now"],
   outlookSignOut: ["退出此应用", "Sign out here"],
   outlookSyncing: ["正在同步 Outlook 收件箱", "Syncing your Outlook inbox"],
@@ -161,8 +162,8 @@ const copy = {
   outlookRateLimit: ["Outlook 暂时限制了请求。稍后会重试。", "Outlook is throttling requests. Sync will retry later."],
   outlookReconnect: ["学校会话需要重新登录。", "Your school session needs you to sign in again."],
   outlookError: ["当前无法连接学校 Outlook。稍后可重试。", "School Outlook could not be reached. Try again later."],
-  outlookEmpty: ["暂无已同步的校内来信", "No campus mail has been synced yet"],
-  outlookNoRelevant: ["当前收件箱没有符合范围的来信。", "Your inbox has no messages within the selected campus scope."]
+  outlookEmpty: ["暂无已同步的来信", "No mail has been synced yet"],
+  outlookNoRelevant: ["当前收件箱没有符合范围的来信。", "Your inbox has no campus mail or journal notices in the current sync range."]
 }
 
 const englishSchools = {

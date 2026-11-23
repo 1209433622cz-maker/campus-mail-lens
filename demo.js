@@ -26,7 +26,15 @@ const demo = [
   ["exhibition", "秋季校园作品展｜展示申请", "大学艺术中心", "art", "17T15:20",
     "报名对象：全校学生\n申请截止：11月22日 18:00\n展览将于12月上旬开放。"],
   ["buddy", "国际交流伙伴计划开放报名", "国际交流办公室", "exchange", "22T16:00",
-    "报名对象：全体学生\n请在活动通知发布后一周内提交申请。具体轮次以收到的确认信为准。\n计划将邀请同学结成双语交流伙伴。"]
+    "报名对象：全体学生\n请在活动通知发布后一周内提交申请。具体轮次以收到的确认信为准。\n计划将邀请同学结成双语交流伙伴。"],
+  ["journal-received", "投稿确认｜编辑部已收稿", "Springer Nature", "demo-submission@springernature.com", "23T15:04",
+    "稿件编号：SN-DEMO-2601\n编辑部已收到你的投稿。初审结束后会通过邮件告知下一步。"],
+  ["journal-review", "稿件进展｜已送同行评审", "Elsevier · Editorial Manager", "demo-submission@editorialmanager.com", "23T13:28",
+    "稿件编号：ELS-DEMO-2612\n你的论文已送同行评审。编辑部将在评审结束后通知你。"],
+  ["journal-revision", "返修通知｜请提交修订稿", "Wiley · Research Exchange", "demo-submission@wiley.com", "23T11:12",
+    "稿件编号：WLY-DEMO-2630\n请提交修订稿和对审稿意见的逐条回复。\n返修截止：11月25日 18:00"],
+  ["journal-proof", "校样通知｜请核对作者信息", "Taylor & Francis", "demo-proofs@tandf.co.uk", "22T16:24",
+    "稿件编号：TF-DEMO-2659\n你的论文校样已可查看。请核对作者姓名与单位，并回复校样。\n校样回复截止：11月27日 18:00"]
 ]
 
 const english = {
@@ -57,14 +65,22 @@ const english = {
   exhibition: ["Autumn campus exhibition: applications to display work", "University Arts Centre",
     "Open to all students.\nApplication deadline: 22 November 18:00\nThe exhibition will open in early December."],
   buddy: ["International exchange buddy programme: sign-ups open", "International Exchange Office",
-    "Open to all students.\nPlease apply within one week of this notice. Check your confirmation email for the assigned round.\nThe programme pairs students for bilingual conversation."]
+    "Open to all students.\nPlease apply within one week of this notice. Check your confirmation email for the assigned round.\nThe programme pairs students for bilingual conversation."],
+  "journal-received": ["Submission confirmation: manuscript received", "Springer Nature",
+    "Manuscript ID: SN-DEMO-2601\nThe journal has received your submission. The editorial office will email you after the initial checks."],
+  "journal-review": ["Manuscript update: sent for peer review", "Elsevier · Editorial Manager",
+    "Manuscript ID: ELS-DEMO-2612\nYour manuscript is under peer review. The editor will contact you when the reviews are complete."],
+  "journal-revision": ["Revision requested: submit your revised manuscript", "Wiley · Research Exchange",
+    "Manuscript ID: WLY-DEMO-2630\nPlease submit your revised manuscript and respond to each reviewer comment.\nRevision deadline: 25 November 18:00"],
+  "journal-proof": ["Article proofs: check your author details", "Taylor & Francis",
+    "Manuscript ID: TF-DEMO-2659\nYour article proofs are ready. Please check the author names and affiliations, then return your corrections.\nProof correction deadline: 27 November 18:00"]
 }
 
 export const demoMessages = demo.map(([id, subject, senderName, alias, date, body]) => ({
   id: "demo-" + id,
   subject,
   senderName,
-  senderEmail: alias + "@campus.example",
+  senderEmail: alias.includes("@") ? alias : alias + "@campus.example",
   sentAt: "2026-11-" + date + ":00+08:00",
   body,
   english: { subject: english[id][0], senderName: english[id][1], body: english[id][2] },

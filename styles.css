@@ -408,6 +408,7 @@ select:focus-visible { outline-offset: 1px; }
 .source-library { --source: #7bd6b5; --source-ink: #17644b; --source-bg: #dcf5ea; }
 .source-college { --source: var(--gold); --source-ink: #825010; --source-bg: #fff0d8; }
 .source-club { --source: #eaa6c6; --source-ink: #91436a; --source-bg: #fae9f2; }
+.source-journal { --source: #d9826b; --source-ink: #923d2b; --source-bg: #f9e8e2; }
 .source-other { --source: #b1a9ca; --source-ink: #534a66; --source-bg: #eeeaf5; }
 .row-content { min-width: 0; }
 .row-eyebrow { display: flex; gap: 7px; color: var(--muted); font-size: .8rem; line-height: 1.4; align-items: center; }

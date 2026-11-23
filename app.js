@@ -10,7 +10,7 @@ import { createOutlookReader } from "./outlook-reader.js"
 
 const PAGE_SIZE = 40
 const englishCount = new Intl.NumberFormat("en-GB")
-const englishSourceMarks = { admin: "A", school: "S", library: "L", college: "C", club: "G", other: "O" }
+const englishSourceMarks = { admin: "A", school: "S", library: "L", college: "C", club: "G", journal: "J", other: "O" }
 const $ = id => document.getElementById(id)
 const demo = demoMessages.map(message => ({
   ...analyzeMail(message),

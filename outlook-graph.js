@@ -1,8 +1,10 @@
+import { emailDomain, isCampusSender, isJournalMail, isJournalSender } from "./classify.js"
 import { normalizeMail, plainHtml } from "./import-mail.js"
 
 const graphOrigin = "https://graph.microsoft.com"
 const inboxDelta = "/v1.0/me/mailFolders/inbox/messages/delta"
 const fields = "id,subject,sender,from,receivedDateTime,sentDateTime,body,bodyPreview,isRead,webLink"
+const inboxScope = "campus-and-journals-v1"
 const day = 24 * 60 * 60 * 1000
 const roleClaims = new Map([
   ["campus.undergraduate", "undergraduate"],
@@ -18,14 +20,6 @@ export class GraphError extends Error {
     this.code = code
     this.retryAfter = retryAfter
   }
-}
-
-function emailDomain(address) {
-  return String(address ?? "").trim().toLowerCase().split("@")[1] ?? ""
-}
-
-function isCampusSender(address) {
-  return /^(?:[a-z0-9-]+\.)*cuhk\.edu\.cn$/i.test(emailDomain(address))
 }
 
 export function campusIdentity(account, profile, tenantId) {
@@ -109,22 +103,25 @@ function initialDelta(now, historyDays) {
 async function convertMessage(row, identityKey, previous) {
   const from = row.sender?.emailAddress ?? row.from?.emailAddress
   const address = from?.address ?? previous?.senderEmail ?? ""
-  if (!isCampusSender(address)) return null
+  const campus = isCampusSender(address)
+  if (!campus && !isJournalSender(address)) return null
 
   const rawText = row.body?.content || ""
   const body = row.body?.contentType?.toLowerCase() === "html" ? plainHtml(rawText) : rawText
-  const message = await normalizeMail({
+  const fullBody = body || (previous?.bodyFormat === "full" ? previous.body : "")
+  const received = {
     messageId: identityKey + ":" + row.id,
     subject: row.subject ?? previous?.subject ?? "（无主题）",
     senderName: from?.name ?? previous?.senderName,
     senderEmail: address,
     sentAt: row.sentDateTime || row.receivedDateTime || previous?.sentAt,
-    body: body || row.bodyPreview || previous?.body,
-    bodyFormat: body ? "full" : row.bodyPreview ? "preview" : previous?.bodyFormat,
+    body: fullBody || row.bodyPreview || previous?.body,
+    bodyFormat: fullBody ? "full" : row.bodyPreview ? "preview" : previous?.bodyFormat,
     originalUrl: row.webLink ?? previous?.originalUrl,
     wasRead: row.isRead ?? previous?.wasRead
-  })
-  return { ...message, providerId: row.id }
+  }
+  if (!campus && !isJournalMail(received)) return null
+  return { ...await normalizeMail(received), providerId: row.id }
 }
 
 async function readPages(request, identity, snapshot, now, historyDays) {
@@ -150,17 +147,19 @@ async function readPages(request, identity, snapshot, now, historyDays) {
     if (page["@odata.nextLink"]) next = deltaLink(page["@odata.nextLink"])
     else {
       const finalLink = deltaLink(page["@odata.deltaLink"])
-      return { messages: [...messages.values()], deltaLink: finalLink, syncedAt: now }
+      return { messages: [...messages.values()], deltaLink: finalLink, syncedAt: now, scope: inboxScope }
     }
   }
   throw new Error("invalidGraphResponse")
 }
 
 export async function syncInbox({ request, identity, snapshot = null, now = Date.now(), historyDays = 30 }) {
+  // Earlier cursors omitted journal mail that had already arrived.
+  const current = snapshot?.scope === inboxScope ? snapshot : null
   try {
-    return await readPages(request, identity, snapshot, now, historyDays)
+    return await readPages(request, identity, current, now, historyDays)
   } catch (error) {
-    if (snapshot?.deltaLink && (error.status === 410 || error.code === "SyncStateNotFound")) {
+    if (current?.deltaLink && (error.status === 410 || error.code === "SyncStateNotFound")) {
       return readPages(request, identity, null, now, historyDays)
     }
     throw error

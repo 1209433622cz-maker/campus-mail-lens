@@ -25,6 +25,7 @@ export const SOURCES = {
   library: { label: "图书馆与信息服务", glyph: "图" },
   college: { label: "书院", glyph: "书" },
   club: { label: "社团与学生组织", glyph: "社" },
+  journal: { label: "学术期刊", glyph: "刊" },
   other: { label: "其他来源", glyph: "其" }
 }
 
@@ -41,7 +42,7 @@ export const TOPICS = {
 export const PRIORITIES = {
   soon: "即将截止",
   action: "需要行动",
-  info: "校园资讯",
+  info: "一般通知",
   unrelated: "其他人群",
   expired: "已经截止"
 }
@@ -53,6 +54,20 @@ const sourceMatchers = [
   ["college", /书院|(?:harmonia|diligentia|muse|shaw|ling|minerva|duan family|tiancheng) college/i],
   ["school", /学院|学科部|研究院|实验室|论坛|school of|department of|faculty of|graduate program|postgraduate program|research institute|(?:science|academic) forum/i],
   ["admin", /教务|注册|行政|服务中心|招生|大学艺术中心|事务|规划|发展处|人力资源|财务|就业|国际交流|office|registry|counselling|counseling|admissions?|campus services|administration|student affairs/i]
+]
+const journalDomains = [
+  "springernature.com", "springer.com", "springeropen.com", "nature.com", "biomedcentral.com",
+  "elsevier.com", "sciencedirect.com", "cell.com", "thelancet.com", "wiley.com", "wiley-vch.de",
+  "taylorandfrancis.com", "tandfonline.com", "tandf.co.uk",
+  "editorialmanager.com", "manuscriptcentral.com", "scholarone.com", "ejpress.com",
+  "mdpi.com", "frontiersin.org", "plos.org", "sagepub.com", "oup.com", "ieee.org"
+]
+const manuscriptNotices = [
+  /\b(?:manuscript|submission|article|paper)\s+(?:id|number|no\.?|reference)[\s:#-]+[\w./-]*\d/i,
+  /\b(?:submission (?:confirmation|received|status update)|status of your (?:manuscript|submission|article)|manuscript (?:received|submitted|under review)|editorial decision|decision (?:on|for) (?:your |the )?(?:manuscript|submission|paper)|(?:major|minor) revision|revision (?:request(?:ed)?|deadline|due)|(?:page|galley) proofs?|proofs? (?:ready|available|for (?:your |the )?article)|article publishing agreement)\b/i,
+  /\b(?:thank you for submitting (?:your |the )?(?:manuscript|article|paper)|please submit (?:your |a )?revised manuscript)\b/i,
+  /\byour (?:revised )?(?:manuscript|submission|article|paper)\b[^.!?\n]{0,90}\b(?:been (?:received|submitted|assigned|sent|accepted|declined|rejected|published|returned|withdrawn)|(?:is|now) (?:with (?:the |an )?editor|under (?:peer )?review|accepted|published)|publishing agreement|license agreement)\b/i,
+  /稿件\s*(?:编号|号码|ID)|投稿\s*(?:确认|成功|已收到|进展|状态)|(?:稿件|论文|投稿).{0,12}(?:已收到|已提交|已送审|外审中|评审中|审稿中|已录用|已拒稿|已发表|已退回)|(?:返修|修回|修订)(?:通知|要求|截止)|录用通知|拒稿通知|(?:论文|稿件)校样|校样(?:通知|已可查看|确认|截止)/i
 ]
 const topicMatchers = [
   ["career", /校招|招聘|就业|宣讲|实习|职业|career|internship|recruitment|job fair/i],
@@ -93,6 +108,28 @@ const timeFormatter = new Intl.DateTimeFormat("zh-CN", {
 
 export function normalText(value) {
   return String(value ?? "").normalize("NFKC").replace(/\r\n?/g, "\n")
+}
+
+export function emailDomain(address) {
+  const matched = String(address ?? "").trim().match(/^[^\s@<>]+@((?:[a-z0-9-]+\.)+[a-z0-9-]+)$/i)
+  return matched?.[1].toLowerCase() ?? ""
+}
+
+export function isCampusSender(address) {
+  return /^(?:[a-z0-9-]+\.)*cuhk\.edu\.cn$/.test(emailDomain(address))
+}
+
+export function isJournalSender(address) {
+  const domain = emailDomain(address)
+  return journalDomains.some(host => domain === host || domain.endsWith("." + host))
+}
+
+export function isJournalMail(mail) {
+  if (!isJournalSender(mail.senderEmail)) return false
+  const subject = normalText(mail.subject).trim()
+  if (/^(?:under (?:peer )?review|with (?:the )?editor|reviews? completed|decision (?:in process|pending))\b/i.test(subject)) return true
+  const text = subject + "\n" + normalText(mail.body)
+  return manuscriptNotices.some(pattern => pattern.test(text))
 }
 
 function nonemptyLines(text) {
@@ -222,14 +259,15 @@ export function analyzeMail(mail) {
   const subject = normalText(mail.subject)
   const body = normalText(mail.body)
   const from = normalText(mail.senderName + " " + mail.senderEmail)
-  const source = sourceMatchers.find(([, pattern]) => pattern.test(from))?.[0] ?? "other"
+  const source = isJournalMail(mail) ? "journal" : sourceMatchers.find(([, pattern]) => pattern.test(from))?.[0] ?? "other"
   const careerSender = /职业规划|就业指导|career planning|career development|\bcpdo\b/i.test(from)
-  const topic = careerSender ? "career" : topicMatchers.find(([, pattern]) => pattern.test(subject))?.[0] ?? "general"
+  const topic = source === "journal" ? "research"
+    : careerSender ? "career" : topicMatchers.find(([, pattern]) => pattern.test(subject))?.[0] ?? "general"
   const audience = inferAudience(mail)
   const deadline = findDeadline(mail)
   const action = [subject, ...nonemptyLines(body)].find(line => actionCue.test(line)) ?? ""
   const search = normalText([subject, from, body, TOPICS[topic], SOURCES[source].label, audience.label].join(" ")).toLowerCase()
-  const campusDomain = /@(?:[a-z0-9-]+\.)*cuhk\.edu\.cn$/i.test(mail.senderEmail)
+  const campusDomain = isCampusSender(mail.senderEmail)
   return { ...mail, source, topic, audience, deadline, action, search, campusDomain }
 }
 
