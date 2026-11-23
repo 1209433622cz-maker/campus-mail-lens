@@ -8,9 +8,15 @@ const CAMPUS_OFFSET = 8 * HOUR
 export const PROFILES = {
   graduate: "研究生",
   undergraduate: "本科生",
+  student: "学生",
   faculty: "教师",
   staff: "行政员工",
+  employee: "教职员工",
   all: "全部师生"
+}
+const profileGroups = {
+  student: ["graduate", "undergraduate"],
+  employee: ["faculty", "staff"]
 }
 
 export const SOURCES = {
@@ -229,7 +235,8 @@ export function analyzeMail(mail) {
 
 export function prioritize(item, profile, now) {
   const { date, hint } = item.deadline
-  if (profile !== "all" && item.audience.roles.length && !item.audience.roles.includes(profile)) {
+  const selectedRoles = profileGroups[profile] ?? [profile]
+  if (profile !== "all" && item.audience.roles.length && !selectedRoles.some(role => item.audience.roles.includes(role))) {
     return { level: "unrelated", reasonKey: "reason.unrelated", quote: item.audience.evidence }
   }
   if (date && date.at < now) {

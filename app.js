@@ -6,6 +6,7 @@ import { demoMessages } from "./demo.js"
 import { copyForAudience, setPageLanguage, translate } from "./i18n.js"
 import { collectMail } from "./import-mail.js"
 import { insertLocalMail, loadFlags, loadPreference, readLocalMail, saveFlags, savePreference } from "./storage.js"
+import { createOutlookReader } from "./outlook-reader.js"
 
 const PAGE_SIZE = 40
 const englishCount = new Intl.NumberFormat("en-GB")
@@ -33,14 +34,71 @@ const state = {
   reading: false,
   limit: PAGE_SIZE,
   importing: false,
-  loading: true
+  loading: true,
+  outlook: null
 }
+const outlookReader = createOutlookReader(outlookChanged)
+let outlookMessages = []
 let toastTimer
 let visibleMessages = []
 const t = (key, values) => translate(state.language, key, values)
 
 function countText(count) {
   return state.language === "en" ? englishCount.format(count) : String(count)
+}
+
+function activeProfile() {
+  return state.library === "outlook" ? state.outlook?.identity?.role ?? "all" : state.profile
+}
+
+function outlookChanged(next) {
+  const previous = state.outlook
+  state.outlook = next
+  if (next.messages !== previous?.messages) outlookMessages = next.messages.map(analyzeMail)
+  if (next.identity && next.identity.key !== previous?.identity?.key) {
+    switchLibrary("outlook")
+    return
+  }
+  if (!next.identity && state.library === "outlook") {
+    switchLibrary(imported.size ? "local" : "demo")
+    return
+  }
+  render()
+}
+
+function outlookControls() {
+  const account = state.outlook?.identity
+  const status = state.outlook ?? {}
+  $("school-sign-in").hidden = Boolean(account)
+  $("school-sign-in").disabled = status.phase === "checking"
+  document.querySelector('[data-library="outlook"]').hidden = !account
+  $("outlook-status").hidden = !account && !status.problem && status.phase !== "checking"
+  $("outlook-refresh").hidden = !account
+  $("outlook-refresh").disabled = Boolean(status.pending)
+  $("outlook-sign-out").hidden = !account
+  $("outlook-account-name").textContent = account ? account.name + " · " + t("profile." + account.role) : t("schoolSignIn")
+  let label = status.problem ?? (status.pending ? "outlookSyncing" : status.phase === "checking" ? "outlookConnectPending" : "outlookReady")
+  let time
+  if (label === "outlookReady" && status.syncedAt) {
+    label = "outlookLastSync"
+    time = new Intl.DateTimeFormat(state.language === "en" ? "en-GB" : "zh-CN", {
+      timeZone: "Asia/Hong_Kong", month: "short", day: "numeric",
+      hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+    }).format(status.syncedAt)
+  }
+  $("outlook-state").textContent = t(label, { time })
+}
+
+function openSchoolSignIn() {
+  const phase = state.outlook?.phase ?? "setup"
+  if (phase === "setup") {
+    $("outlook-redirect").textContent = new URL("./", import.meta.url).href
+    $("outlook-dialog").showModal()
+  } else if (phase === "error") {
+    void outlookReader.start()
+  } else {
+    void outlookReader.signIn()
+  }
 }
 
 function visibleCopy(item) {
@@ -217,7 +275,8 @@ function selectors(inbox, entries) {
     $(level + "-count").textContent = countText(inbox.filter(entry => entry.priority.level === level).length)
     quick.setAttribute("aria-pressed", String(state.priority === level && state.view === "inbox"))
   }
-  $("profile").value = state.profile
+  $("profile").value = activeProfile()
+  $("profile").disabled = state.library === "outlook"
   $("source-filter").value = state.source
   $("topic-filter").value = state.topic
   $("priority-filter").value = state.priority
@@ -226,6 +285,7 @@ function selectors(inbox, entries) {
   $("page-title").textContent = t("view." + state.view)
   $("breadcrumb-current").textContent = t("view." + state.view)
   $("page-description").textContent = t("viewDescription." + state.view)
+  outlookControls()
 }
 
 function matchesSearch(item, words) {
@@ -237,8 +297,9 @@ function matchesSearch(item, words) {
 
 function render() {
   const now = state.library === "demo" ? DEMO_NOW : Date.now()
-  const data = state.library === "demo" ? demo : imported.values()
-  const entries = Array.from(data, item => ({ item, status: flags(item), priority: prioritize(item, state.profile, now) }))
+  const data = state.library === "demo" ? demo : state.library === "outlook" ? outlookMessages : imported.values()
+  const profile = activeProfile()
+  const entries = Array.from(data, item => ({ item, status: flags(item), priority: prioritize(item, profile, now) }))
   const inbox = entries.filter(entry => !entry.status.done)
   const scoped = state.view === "inbox" ? inbox : entries.filter(entry => entry.status[state.view])
   const words = normalText(state.query).trim().toLowerCase().split(/\s+/).filter(Boolean)
@@ -264,6 +325,11 @@ function render() {
     $("mail-list").replaceChildren(state.loading
       ? empty(t("loadingLocal"))
       : empty(t("noLocalTitle"), t("noLocalDescription"), { label: t("importFirst"), run: openImport }))
+  } else if (state.library === "outlook" && !entries.length) {
+    const status = state.outlook
+    $("mail-list").replaceChildren(status.pending
+      ? empty(t("outlookSyncing"))
+      : empty(t("outlookEmpty"), t(status.problem ?? "outlookNoRelevant")))
   } else {
     const title = filterActive ? "noMatches" : state.view === "saved" ? "noSaved" : state.view === "done" ? "noDone" : "noInbox"
     $("mail-list").replaceChildren(empty(t(title), undefined, filterActive ? { label: t("clearFilters"), run: clearFilters } : null))
@@ -324,7 +390,7 @@ function drawDetail(entry) {
 
   const tags = element("div", "detail-tags")
   tags.append(badge(t("priority." + priority.level), "priority-" + priority.level), badge(t("source." + item.source)), badge(t("topic." + item.topic)))
-  if (state.library === "local" && item.campusDomain) tags.append(badge(t("campusSender")))
+  if (state.library !== "demo" && item.campusDomain) tags.append(badge(t("campusSender")))
   const facts = element("dl", "facts")
   const audience = copyForAudience(state.language, item.audience)
   facts.append(
@@ -334,7 +400,7 @@ function drawDetail(entry) {
   if (item.bodyFormat === "preview") facts.append(detailFact(t("bodyCoverage"), t("previewCoverage")))
 
   const reason = element("div", "reason")
-  reason.append(element("h3", "", t("reason")), element("p", "", t(priority.reasonKey, { audience, profile: t("profile." + state.profile) })))
+  reason.append(element("h3", "", t("reason")), element("p", "", t(priority.reasonKey, { audience, profile: t("profile." + activeProfile()) })))
   const quote = shown === item || !priority.quote ? priority.quote
     : prioritize(shown, state.profile, DEMO_NOW).quote
   if (quote) reason.append(element("p", "source-line", t("quote", { text: quote.slice(0, 230) })))
@@ -465,6 +531,9 @@ function connectControls() {
   })
   $("about-button").addEventListener("click", () => $("about-dialog").showModal())
   $("import-button").addEventListener("click", openImport)
+  $("school-sign-in").addEventListener("click", openSchoolSignIn)
+  $("outlook-refresh").addEventListener("click", () => { void outlookReader.refresh({ manual: true }) })
+  $("outlook-sign-out").addEventListener("click", () => { void outlookReader.signOut() })
   for (const control of document.querySelectorAll("[data-close]")) {
     control.addEventListener("click", () => $(control.dataset.close).close())
   }
@@ -490,6 +559,7 @@ function connectControls() {
 connectControls()
 setPageLanguage(state.language)
 render()
+void outlookReader.start()
 try {
   for (const mail of await readLocalMail()) imported.set(mail.id, analyzeMail(mail))
 } catch {

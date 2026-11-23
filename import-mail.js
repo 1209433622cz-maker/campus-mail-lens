@@ -20,7 +20,7 @@ export function safeOriginalUrl(raw) {
   }
 }
 
-function plainHtml(html) {
+export function plainHtml(html) {
   const template = document.createElement("template")
   template.innerHTML = html
   const fragment = template.content

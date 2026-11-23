@@ -126,7 +126,8 @@ p, h1, h2, h3 { margin: 0; }
 }
 .library-switch {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   padding: 4px;
   border: 1px solid var(--line);
   background: #f7f3f7;
@@ -215,6 +216,22 @@ p, h1, h2, h3 { margin: 0; }
 .button:hover, .icon-button:hover { background: var(--purple-muted); border-color: var(--purple-border); }
 .button-primary { background: var(--purple); border-color: var(--purple); color: white; box-shadow: 0 2px 4px #6d266522; }
 .button-primary:hover { background: var(--purple-ink); border-color: var(--purple-ink); }
+.school-sign-in { color: var(--purple-ink); border-color: var(--purple-border); }
+.outlook-status {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 12px;
+  padding: 11px 14px;
+  background: var(--purple-muted);
+  color: var(--purple-ink);
+  border: 1px solid var(--purple-border);
+  border-radius: 10px;
+}
+.outlook-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.outlook-text strong { font-size: .9rem; }
+.outlook-text p { color: var(--muted); font-size: .83rem; line-height: 1.45; }
+.outlook-setup code { overflow-wrap: anywhere; }
 .icon-button { min-height: 35px; width: 35px; padding: 0; }
 .icon-button[aria-pressed="true"] { color: var(--purple-ink); background: var(--purple-wash); border-color: var(--purple-border); }
 .icon-button .glyph { width: 17px; height: 17px; }
@@ -612,12 +629,15 @@ dialog::backdrop { background: #251b3a75; }
   .sidebar .nav-item .glyph { display: none; }
   .library-switch { width: 100%; }
   .library-switch button { padding: 5px 2px; }
-  .top-actions { gap: 6px; }
+  .top-actions { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
   .profile-control, .button { min-height: 35px; }
   .profile-control { padding: 0; }
   .profile-control .glyph, #import-button .glyph { display: none; }
   .profile-control select { font-size: .78rem; padding: 6px 21px 6px 6px; }
   #import-button { padding: 6px 7px; font-size: .78rem; }
+  .school-sign-in { padding: 6px 7px; font-size: .78rem; }
+  .school-sign-in .glyph { display: none; }
+  .outlook-status { flex-wrap: wrap; margin-top: 0; padding: 8px 10px; }
   .content { padding: 4px 0 15px; width: 100%; }
   .page-intro { align-items: flex-start; margin-bottom: 13px; flex-wrap: wrap; gap: 7px; padding: 13px 11px; }
   .page-intro h1 { font-size: 1.53rem; }

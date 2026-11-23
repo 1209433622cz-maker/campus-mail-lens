@@ -1,12 +1,16 @@
 const DB_NAME = "campus-mail-lens"
 const MAIL = "messages"
+const OUTLOOK = "outlook-snapshots"
 let opening
 
 function database() {
   if (!opening) {
     opening = new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, 1)
-      request.onupgradeneeded = () => request.result.createObjectStore(MAIL, { keyPath: "id" })
+      const request = indexedDB.open(DB_NAME, 2)
+      request.onupgradeneeded = event => {
+        if (event.oldVersion < 1) request.result.createObjectStore(MAIL, { keyPath: "id" })
+        if (event.oldVersion < 2) request.result.createObjectStore(OUTLOOK, { keyPath: "account" })
+      }
       request.onsuccess = () => {
         const db = request.result
         db.onversionchange = () => {
@@ -60,6 +64,36 @@ export async function insertLocalMail(messages) {
     }
     tx.oncomplete = () => resolve({ inserted, duplicate: duplicate + messages.length - new Set(messages.map(item => item.id)).size })
     tx.onabort = () => reject(tx.error ?? new Error("邮件资料库写入失败"))
+  })
+}
+
+export async function readOutlookSnapshot(account) {
+  const db = await database()
+  return new Promise((resolve, reject) => {
+    const request = db.transaction(OUTLOOK).objectStore(OUTLOOK).get(account)
+    request.onsuccess = () => resolve(request.result ?? null)
+    request.onerror = () => reject(request.error)
+  })
+}
+
+export async function saveOutlookSnapshot(account, snapshot, expectedRevision) {
+  const db = await database()
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(OUTLOOK, "readwrite")
+    const store = transaction.objectStore(OUTLOOK)
+    const lookup = store.get(account)
+    let saved
+    lookup.onsuccess = () => {
+      const current = lookup.result
+      if ((current?.revision ?? 0) !== expectedRevision) {
+        saved = current
+        return
+      }
+      saved = { ...snapshot, account, revision: expectedRevision + 1 }
+      store.put(saved)
+    }
+    transaction.oncomplete = () => resolve(saved)
+    transaction.onabort = () => reject(transaction.error ?? new Error("Outlook cache write failed"))
   })
 }
 
